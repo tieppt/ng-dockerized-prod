@@ -2,6 +2,43 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.1.0.
 
+
+## Dockerize and K8S
+We have 2 versions: root vs rootless image
+
+### Rancher Desktop
+Homepage: https://rancherdesktop.io/
+
+By default, RD will mount the **home directory**. (E.g /User/tiep), therefore to build the image, you need to clone the repo to **home directory**.
+
+To build image:
+
+```sh
+nerdctl --namespace k8s.io build -f Dockerfile.rootless -t spa-app:v1.0 . 
+```
+
+To run RD k8s:
+```sh
+kubectl apply -f k8s/app.yaml
+```
+
+Open your browser at http://localhost:8080
+
+### Docker compose
+
+To building and running the project:
+
+- Rootless:
+```sh
+docker-compose -f docker-compose-rootless.yml up -d --build
+```
+
+- or Root version:
+
+```sh
+docker-compose up -d --build  
+```
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.

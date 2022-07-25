@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: spa-web-app
+  name: spa-web-app
+  # namespace: spak8s # for local testing, we use default namespace
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spa-web-app
+  template:
+    metadata:
+      labels:
+        app: spa-web-app
+    spec:
+      containers:
+      - image: spa-app:v1.0
+        imagePullPolicy: Never # for local testing, we use images from k8s.io namespace
+        name: spa-web-app
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: "0.5"
+          requests:
+            memory: 256Mi
+            cpu: "0.2"
+        env:
+          - name: BASE_URL
+            value: https://www.tiepphan.com
+          - name: BASE_PATH
+            value: /
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: spa-web-app
+  name: spa-web-app
+  # namespace: spak8s # for local testing, we use default namespace
+spec:
+  ports:
+  - name: 8080-8080
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: spa-web-app
+  type: LoadBalancer # this is for testing
+
