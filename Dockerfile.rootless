@@ -1,0 +1,38 @@
+# stage 1 as builder
+FROM node:16-alpine as builder
+
+RUN mkdir /app
+
+WORKDIR /app
+
+# copy the package.json to install dependencies
+COPY package.json package-lock.json ./
+
+# Install the dependencies and make the folder
+RUN npm install
+
+COPY . .
+
+# Build the project and copy the files
+RUN npm run build
+
+# Stage 2
+FROM nginxinc/nginx-unprivileged:1.23-alpine
+COPY --chown=nginx ./docker/default.conf.template /
+RUN rm -rf /var/www/*
+
+ENV BASE_URL=https://jsonplaceholder.typicode.com
+ENV BASE_PATH=/
+
+# Copy from the stage 1
+COPY --chown=nginx --from=builder /app/dist/ng-dockerized-prod /var/www
+COPY ./docker/entrypoint-rootless.sh /docker-entrypoint.d/
+
+ARG UID=101
+ARG GID=101
+
+USER root
+RUN chown -R $UID:0 "/var/www" && chmod -R g+w "/var/www"
+USER $UID
+
+EXPOSE 8080
